@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>POS & NER Tagger • Demo</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="color-scheme" content="light dark"/>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <header class="bg-white border-b">
+    <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gray-900 text-white grid place-items-center font-semibold">NLP</div>
+        <div>
+          <h1 class="text-lg font-semibold">POS & NER Tagger</h1>
+          <p class="text-sm text-gray-500">DurianPy.AI Engineering Workflow</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-6 py-8">
+    <section class="bg-white border rounded-2xl p-6 shadow-sm">
+      <h2 class="text-xl font-semibold mb-1">Analyze text</h2>
+      <p class="text-sm text-gray-600 mb-6">Returns tokens with POS/lemma and named entities.</p>
+
+      <form id="form" class="space-y-4" onsubmit="return false;">
+        <textarea id="text" rows="4" class="w-full border rounded-xl p-3"
+          placeholder="Paste text, e.g. Apple is looking at buying U.K. startup for $1 billion."></textarea>
+        <div class="flex items-center gap-3">
+          <button id="run" class="bg-gray-900 text-white rounded-xl px-4 py-2">Analyze</button>
+          <button id="clear" class="text-sm text-gray-600">Clear</button>
+        </div>
+      </form>
+
+      <div id="error" class="hidden mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-red-800"></div>
+      <div id="out" class="mt-6 grid md:grid-cols-2 gap-4"></div>
+    </section>
+  </main>
+
+<script>
+const API = location.origin;
+const form = document.getElementById('form');
+const run = document.getElementById('run');
+const clearBtn = document.getElementById('clear');
+const textEl = document.getElementById('text');
+const out = document.getElementById('out');
+const errBox = document.getElementById('error');
+
+function showError(msg){ errBox.classList.remove('hidden'); errBox.textContent = msg; }
+function hideError(){ errBox.classList.add('hidden'); errBox.textContent = ''; }
+
+function render(data){
+  out.innerHTML = '';
+
+  // Entities card
+  const ents = document.createElement('div');
+  ents.className = 'bg-gray-50 border rounded-xl p-4';
+  ents.innerHTML = '<h3 class="font-semibold mb-2">Entities</h3>';
+  if ((data.ents || []).length === 0) {
+    ents.innerHTML += '<p class="text-sm text-gray-600">No entities found.</p>';
+  } else {
+    const list = document.createElement('ul');
+    list.className = 'text-sm space-y-1';
+    data.ents.forEach(e => {
+      const li = document.createElement('li');
+      li.innerHTML = `<code class="bg-white border px-2 rounded">${e.text}</code> <span class="text-gray-600">${e.label}</span> [${e.start_char}-${e.end_char}]`;
+      list.appendChild(li);
+    });
+    ents.appendChild(list);
+  }
+  out.appendChild(ents);
+
+  // Tokens card
+  const toks = document.createElement('div');
+  toks.className = 'bg-gray-50 border rounded-xl p-4 overflow-auto';
+  toks.innerHTML = '<h3 class="font-semibold mb-2">Tokens</h3>';
+  const table = document.createElement('table');
+  table.className = 'text-sm w-full';
+  table.innerHTML = `
+    <thead class="text-left text-gray-600">
+      <tr><th>Text</th><th>Lemma</th><th>POS</th><th>Tag</th><th>Dep</th><th>Head</th><th>Idx</th></tr>
+    </thead>
+    <tbody></tbody>`;
+  const tbody = table.querySelector('tbody');
+  (data.tokens || []).forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${t.text}</td><td>${t.lemma}</td><td>${t.pos}</td><td>${t.tag}</td><td>${t.dep}</td><td>${t.head}</td><td>${t.idx}</td>`;
+    tbody.appendChild(tr);
+  });
+  toks.appendChild(table);
+  out.appendChild(toks);
+}
+
+async function analyze(){
+  hideError();
+  const text = textEl.value.trim();
+  if (!text) return showError('Please paste some text.');
+  run.disabled = true;
+  try {
+    const res = await fetch(API + '/analyze', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ text })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    render(data);
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    run.disabled = false;
+  }
+}
+
+form.addEventListener('submit', analyze);
+run.addEventListener('click', analyze);
+clearBtn.addEventListener('click', () => { textEl.value=''; out.innerHTML=''; hideError(); });
+</script>
+</body>
+</html>
