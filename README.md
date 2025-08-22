@@ -17,7 +17,14 @@ Before starting, make sure you have:
 - A stable internet connection  
 
 ---
-
+📂 Project Structure
+nerpos/
+│── app.py              # FastAPI application
+│── requirements.txt    # Python dependencies
+│── Dockerfile          # Containerization setup
+│── static/
+│    └── index.html     # Simple frontend interface
+---
 ## ⚡ Step 1: Clone the Repository
 
 Open your terminal (PowerShell on Windows, Terminal on macOS/Linux) and run:
