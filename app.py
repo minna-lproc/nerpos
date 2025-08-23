@@ -51,8 +51,6 @@ def analyze(payload: AnalyzeIn) -> Dict[str, Any]:
                 "lemma": t.lemma_,
                 "pos": t.pos_,
                 "tag": t.tag_,
-                "dep": t.dep_,
-                "head": t.head.text,
                 "idx": t.idx,
             }
             for t in doc

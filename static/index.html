@@ -80,13 +80,13 @@ function render(data){
   table.className = 'text-sm w-full';
   table.innerHTML = `
     <thead class="text-left text-gray-600">
-      <tr><th>Text</th><th>Lemma</th><th>POS</th><th>Tag</th><th>Dep</th><th>Head</th><th>Idx</th></tr>
+      <tr><th>Text</th><th>Lemma</th><th>POS</th><th>Tag</th><th>Idx</th></tr>
     </thead>
     <tbody></tbody>`;
   const tbody = table.querySelector('tbody');
   (data.tokens || []).forEach(t => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${t.text}</td><td>${t.lemma}</td><td>${t.pos}</td><td>${t.tag}</td><td>${t.dep}</td><td>${t.head}</td><td>${t.idx}</td>`;
+    tr.innerHTML = `<td>${t.text}</td><td>${t.lemma}</td><td>${t.pos}</td><td>${t.tag}</td><td>${t.idx}</td>`;
     tbody.appendChild(tr);
   });
   toks.appendChild(table);
